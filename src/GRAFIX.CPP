@@ -73,21 +73,6 @@ void drawdice(int number, int x, int y, int size)
 	}		
 }
 
-void piecedraw(int x, int y, int radius, int color)
-{
-	int i;
-	setcolor(color);
-	//Draw the inner colored portion
-	for (i = 0; i <= radius; i++)
-		circle(x, y, i);
-	
-	//Draw the outer black boundary
-	setcolor(BLACK);
-	circle(x,y,radius);
-	setfillstyle(SOLID_FILL, color);
-	floodfill(x,y,BLACK);	
-}
-
 void draw_button(int left, int top, int right, int bottom, int color, int shade1, int shade2, int txtcolor, char *text, int* up, int* down)
 {
 	int j;

@@ -518,6 +518,35 @@ void new_game_vars()
 	board[13][1].top = 0;	board[13][1].pieces[0] = 1;		board[13][1].player = PLR_GREEN;
 	board[10][4].top = 0;	board[10][4].pieces[0] = 2;		board[10][4].player = PLR_GREEN;
 	board[13][4].top = 0;	board[13][4].pieces[0] = 3;		board[13][4].player = PLR_GREEN;
+
+	//Set home positions of red geetees
+	player[PLR_RED].piece[0].location.x = 10;
+	player[PLR_RED].piece[0].location.y = 10;
+	player[PLR_RED].piece[1].location.x = 13;
+	player[PLR_RED].piece[1].location.y = 10;
+	player[PLR_RED].piece[2].location.x = 10;
+	player[PLR_RED].piece[2].location.y = 13;
+	player[PLR_RED].piece[3].location.x = 13;
+	player[PLR_RED].piece[3].location.y = 13;
+	board[10][10].top = 0; 	board[10][10].pieces[0] = 0;		board[10][10].player = PLR_RED;
+	board[13][10].top = 0;	board[13][10].pieces[0] = 1;		board[13][10].player = PLR_RED;
+	board[10][13].top = 0;	board[10][13].pieces[0] = 2;		board[10][13].player = PLR_RED;
+	board[13][13].top = 0;	board[13][13].pieces[0] = 3;		board[13][13].player = PLR_RED;
+
+	//Set home positions of yellow geetees
+	player[PLR_YELLOW].piece[0].location.x = 1;
+	player[PLR_YELLOW].piece[0].location.y = 10;
+	player[PLR_YELLOW].piece[1].location.x = 4;
+	player[PLR_YELLOW].piece[1].location.y = 10;
+	player[PLR_YELLOW].piece[2].location.x = 1;
+	player[PLR_YELLOW].piece[2].location.y = 13;
+	player[PLR_YELLOW].piece[3].location.x = 4;
+	player[PLR_YELLOW].piece[3].location.y = 13;
+	board[1][10].top = 0; 	board[1][10].pieces[0] = 0;		board[1][10].player = PLR_YELLOW;
+	board[4][10].top = 0;	board[4][10].pieces[0] = 1;		board[4][10].player = PLR_YELLOW;
+	board[1][13].top = 0;	board[1][13].pieces[0] = 2;		board[1][13].player = PLR_YELLOW;
+	board[4][13].top = 0;	board[4][13].pieces[0] = 3;		board[4][13].player = PLR_YELLOW;
+
 }
 
 void showlogo()

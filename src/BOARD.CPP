@@ -198,40 +198,60 @@ void draw_block_pieces(int cordx, int cordy)
 			radius = boardgraf.blocksize /3 - 2;
 			x = boardgraf.left + boardgraf.blocksize * cordx + boardgraf.blocksize/2;
 			y = boardgraf.top + boardgraf.blocksize * cordy + boardgraf.blocksize/2;
-			piecedraw(x, y, radius, color);
+			setcolor(BLACK);
+			setfillstyle(SOLID_FILL, color);
+			fillellipse(x,y,radius,radius);
 			break;
 		case 2:
 			radius = boardgraf.blocksize /4 - 2;
 			x = boardgraf.left + boardgraf.blocksize * cordx + boardgraf.blocksize/2;
 			y = boardgraf.top + boardgraf.blocksize * cordy + radius + 2;
-			piecedraw(x, y, radius, color);
+			setcolor(BLACK);
+			setfillstyle(SOLID_FILL, color);
+			fillellipse(x,y,radius,radius);
 			y = boardgraf.top + boardgraf.blocksize * (cordy + 1) - radius - 2;
-			piecedraw(x, y, radius, color);
+			setcolor(BLACK);
+			setfillstyle(SOLID_FILL, color);
+			fillellipse(x,y,radius,radius);
 			break;
 		case 3:
 			radius = boardgraf.blocksize /4 - 2;
 			x = boardgraf.left + boardgraf.blocksize * cordx + boardgraf.blocksize/2;
 			y = boardgraf.top + boardgraf.blocksize * cordy + radius + 2;
-			piecedraw(x, y, radius, color);
+			setcolor(BLACK);
+			setfillstyle(SOLID_FILL, color);
+			fillellipse(x,y,radius,radius);
 			y = boardgraf.top + boardgraf.blocksize * (cordy + 1) - radius - 2;
-			piecedraw(x, y, radius, color);
+			setcolor(BLACK);
+			setfillstyle(SOLID_FILL, color);
+			fillellipse(x,y,radius,radius);
 			x = boardgraf.left + boardgraf.blocksize * cordx + radius + 2;
 			y = boardgraf.top + boardgraf.blocksize * cordy + boardgraf.blocksize / 2;
-			piecedraw(x, y, radius, color);
+			setcolor(BLACK);
+			setfillstyle(SOLID_FILL, color);
+			fillellipse(x,y,radius,radius);
 			break;
 		case 4:	
 			radius = boardgraf.blocksize /4 - 2;
 			x = boardgraf.left + boardgraf.blocksize * cordx + boardgraf.blocksize/2;
 			y = boardgraf.top + boardgraf.blocksize * cordy + radius + 2;
-			piecedraw(x, y, radius, color);
+			setcolor(BLACK);
+			setfillstyle(SOLID_FILL, color);
+			fillellipse(x,y,radius,radius);
 			y = boardgraf.top + boardgraf.blocksize * (cordy + 1) - radius - 2;
-			piecedraw(x, y, radius, color);
+			setcolor(BLACK);
+			setfillstyle(SOLID_FILL, color);
+			fillellipse(x,y,radius,radius);
 			x = boardgraf.left + boardgraf.blocksize * cordx + radius + 2;
 			y = boardgraf.top + boardgraf.blocksize * cordy + boardgraf.blocksize / 2;
-			piecedraw(x, y, radius, color);
+			setcolor(BLACK);
+			setfillstyle(SOLID_FILL, color);
+			fillellipse(x,y,radius,radius);
 			x = boardgraf.left + boardgraf.blocksize * (cordx + 1) - radius - 2;
 			y = boardgraf.top + boardgraf.blocksize * cordy + boardgraf.blocksize / 2;
-			piecedraw(x, y, radius, color);
+			setcolor(BLACK);
+			setfillstyle(SOLID_FILL, color);
+			fillellipse(x,y,radius,radius);
 			break;
 	}
 }
@@ -330,10 +350,11 @@ void drawblock(int cordx, int cordy)
 	
 	//When block is of home just vanish the portion of piece
 	setcolor(WHITE);
-	for(int i = 0; i < boardgraf.blocksize /2; i++)
-		circle( boardgraf.left + boardgraf.blocksize * cordx + boardgraf.blocksize /2,
+	setfillstyle(SOLID_FILL, WHITE);
+	fillellipse(boardgraf.left + boardgraf.blocksize * cordx + boardgraf.blocksize /2,
 				boardgraf.top + boardgraf.blocksize * cordy + boardgraf.blocksize /2,
-				i);
+				boardgraf.blocksize /2 - 1,
+				boardgraf.blocksize /2 - 1);
 }
 
 void circblock(int cordx, int cordy, int color, int boundcol)

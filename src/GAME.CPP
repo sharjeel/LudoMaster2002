@@ -210,7 +210,7 @@ int validmove(int cordx, int cordy, int dice, int playernum, int &movetox, int &
 		if( ( (cordx > 0 && cordx < 6 && cordy > 0 && cordy < 6)  ||
 			  (cordx > 8 && cordx < 14 && cordy > 0 && cordy < 6) ||
 			  (cordx > 0 && cordx < 6 && cordy > 8 && cordy < 14)  || 
-			  (cordx > 0 && cordx < 6 && cordy > 0 && cordy < 6) ) &&
+			  (cordx > 8 && cordx < 14 && cordy > 8 && cordy < 14) ) &&
 			  dice != 6)
 			return FALSE;
 
@@ -257,7 +257,7 @@ int validmove(int cordx, int cordy, int dice, int playernum, int &movetox, int &
 		if (board[nextcords.x][nextcords.y].top >= 0 && board[nextcords.x][nextcords.y].player != playernum &&
 			((nextcords.x == 2  && nextcords.y == 8 ) ||
 			 (nextcords.x == 6  && nextcords.y == 2 ) ||
-			 (nextcords.x == 11 && nextcords.y == 6 ) ||
+			 (nextcords.x == 12 && nextcords.y == 6 ) ||
 			 (nextcords.x == 8  && nextcords.y == 12))
 			)
 		return FALSE;
@@ -312,7 +312,7 @@ point nextblock(int cordx, int cordy, int playernum)
 	//Set starting point for yellow's home
 	if(cordx >= 0 && cordx <= 5 && cordy >= 9 && cordy <= 14)
 	{
-		output.x = 8;
+		output.x = 6;
 		output.y = 13;
 		return output;
 	}
@@ -865,9 +865,12 @@ void sendhome(int cordx, int cordy)
 	//---------------	
 	if (board[cordx][cordy].top != 0)
 	{	
+		gotoxy (1,1);
 		cout << "Errooor in sendhome() in game.cpp!!!";
+		return;
 	}
 	//--------
+		
 	int playernum = board[cordx][cordy].player;
 	int piece =	brd_pop(board[cordx][cordy]);
 	int puttox = player[playernum].piece[piece].homelocation.x;
