@@ -1,8 +1,30 @@
 #include "grafix.h"
 #include <graphics.h>
+#include <string.h>
+#include <dos.h>
 
-void store_dice_images()
+void writestatus(char*text)
 {
+	int xmax = getmaxx();
+	int ymax = getmaxy();
+	int i, size = strlen(text);
+	char temp[75];
+
+	setfillstyle(SOLID_FILL, WHITE);
+	bar(0, ymax - 20, 319, ymax);
+	setcolor(BLACK);
+	line(0, ymax - 21, xmax, ymax - 21);
+	line(319, ymax - 20, 319, ymax);
+
+	settextjustify(LEFT_TEXT, CENTER_TEXT);
+
+	for (i = 0; i <= size; i++)
+	{
+				strcpy(temp,text);
+				temp[i] = '\0';
+				outtextxy(10, ymax - 10,temp);
+				delay(5);
+	}
 }
 
 void drawdice(int number, int x, int y, int size)

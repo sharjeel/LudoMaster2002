@@ -4,11 +4,13 @@
 #include <conio.h>
 #include <graphics.h>
 #include <stdlib.h>
+#include <fstream.h>
 #include <iostream.h>
 #include <dos.h>
 	
 extern Board board[15][15];
 extern PlayerInfo player[4];
+extern int turn;
 
 /* Private Function prototypes */
 int gameoptions();
@@ -128,16 +130,15 @@ int mainoptions()
 							break;
 						case 1:
 							// Load game
-//							return loadgame();
-							return 1;
+							return loadgame();
 							break;
 						case 2:
 							// Rules of Ludo
-							return 1;
+							return 0;
 							break;
 						case 3:
 							// About the author
-							return 1;
+							return 0;
 							break;
 						case 4:                   	
 							// Quit
@@ -476,6 +477,33 @@ int gameoptions()
 
 int loadgame()
 {
+	int turn;
+	int i,j;
+	
+	fstream file("save.lud", ios::in);
+
+	if (!file)
+	{
+		cout << "File not found";
+		getch();
+		return 0;
+	}
+	
+	file.read((char*)&turn, sizeof turn);
+
+	for (i = 0; i <= 3; i++)
+	{
+		file.read ((char*)&player[i].type, sizeof player[i].type);
+		
+		for (j = 0; j <= 3; j++)
+		{	
+			file.read( (char*)&player[i].piece[j].status, sizeof player[i].piece[j].status);
+			file.read( (char*)&player[i].piece[j].location, sizeof player[i].piece[j].location);
+		}
+	}
+	
+	file.close();
+	return 1;
 }
 
 void new_game_vars()

@@ -6,37 +6,66 @@
 #include <dos.h>
 #include <graphics.h>
 #include <conio.h>
-#include <iostream.h>
+#include <fstream.h>
 #include <stdlib.h>
 #include <time.h>
 
+//Global Variables
 extern Board board[15][15];
 extern PlayerInfo player[4];
 
+extern int turn; 
+
+//Private structures
+struct undonode
+{
+	int playerturn;
+	int piece;
+	int fromx;
+	int fromy;
+	int tox;
+	int toy;
+	int boolkilled;
+	int playerkilled;
+	int piecekilled;	
+	undonode *prev;
+};
+
+//Local global variables
 boardgraf boardgraf;
+undonode *undotail = NULL;
+
+//Variables for buttons
 button 	roll,
 		quit,
 		help,
 		undo,
 		save;
 
+//Private Constants
+const int ROLLDIE = 0, UNDO = 1, SAVE = 2, HELP = 3, QUIT = 4;
+
+//Private Funciton prototypes
 void drawscreenelements();
-int rolldie(int);
 int getuseroption(int);
 void movepiece(int, int, int, int);
 void sendhome(int, int);
 int validmove(int, int, int, int, int&, int&);
+int rolldie(int);
+void savegame();
 point nextblock(int, int, int);
 point getuserinput();
 int brd_pop(Board&);
 void brd_push(Board&, int, int);
+void addundo(int,int,int,int,int,int,int,int);
+void doundo();
 
 void playgame()
 {
 	int xmax = getmaxx(),
 		ymax = getmaxy();
-	int i, dice, turn = 0, turnagain, finished = FALSE, option, piece_to_move;
-	point usermove, moveto;
+	int i, dice, turnagain, finished = FALSE, option, piece_to_move, boolkilledpiece, playerkilled, piecekilled;
+	point usermove, moveto, homeaddress;
  
 
 	/* Initialise Board's coordinates and its unit size */
@@ -68,17 +97,13 @@ void playgame()
 			if (player[turn].type == TYPE_HUMAN)
 			{
 				//Write in info bar
-				setfillstyle(SOLID_FILL, WHITE);
-				bar(0,ymax - 20, undo.coords[0][0] - 1, ymax);
-				setcolor(BLACK);
-				settextjustify(CENTER_TEXT, CENTER_TEXT);
-				outtextxy(ymax - 10, 10, "Click on Roll to roll the die");
+				writestatus("Roll the die or choose other options");
 
 				//Get user's opiniom if he/she wants to roll the die or save/quit etc
 				option = getuseroption(turn);
 				switch (option)
 				{
-					case 1:
+					case ROLLDIE:
 						//User has rolled die
 						dice = rolldie(turn);
 
@@ -99,6 +124,8 @@ void playgame()
 							player[turn].piece[3].canmove == TRUE 	)
 						{
 
+							writestatus("Please click on a piece on the board");
+							
 							if (dice == 6)
 								turnagain = TRUE;
 
@@ -117,13 +144,26 @@ void playgame()
 							//Move that piece
 							{		  
 								//If there is already a piece sitting on that part, send it to home first (kill it)
+								boolkilledpiece = FALSE;
 								if(board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].top >= 0 &&
 									board[player[turn].piece[piece_to_move].location.x][player[turn].piece[piece_to_move].moveto.y].player != turn)
 								{	
-									//---Send the geetee to home----//
+									playerkilled = board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].player;
+									piecekilled = board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].pieces[0];
+									homeaddress.x = player[playerkilled].piece[piecekilled].homelocation.x;
+									homeaddress.y = player[playerkilled].piece[piecekilled].homelocation.y;
+									sendhome(player[playerkilled].piece[piecekilled].location.x, player[playerkilled].piece[piecekilled].location.y);
+									drawblock(homeaddress.x, homeaddress.y);
+									draw_block_pieces(homeaddress.y, homeaddress.y);
 									turnagain = TRUE;
+									boolkilledpiece = TRUE;
 								}	
 								
+								//Keep track for undopurpose
+								addundo(turn, usermove.x, usermove.y, player[turn].piece[piece_to_move].moveto.x, player[turn].piece[piece_to_move].moveto.y,
+										boolkilledpiece, playerkilled, piecekilled);
+								
+								//Change board coordinates of piece and show on screen
 								movepiece(usermove.x, usermove.y, player[turn].piece[piece_to_move].moveto.x, player[turn].piece[piece_to_move].moveto.y);
 								hide_mouse();
 								drawblock(usermove.x, usermove.y);
@@ -156,8 +196,35 @@ void playgame()
 								}
 							}														
 						}
-
-					break;
+						break;
+					case UNDO:
+						doundo();
+						turnagain = TRUE;					
+						break;
+						
+					case SAVE:
+						savegame();
+						turnagain = TRUE;
+						writestatus("Game Has been saved");
+						break;
+											
+					case HELP:
+						turnagain = TRUE;
+						break;					
+					case QUIT:
+						//Deallocate the memory
+						free ( (void*) roll.up);
+						free ( (void*) roll.down);
+						free ( (void*) quit.up);
+						free ( (void*) quit.down);
+						free ( (void*) help.up);
+						free ( (void*) help.down);
+						free ( (void*) undo.up);
+						free ( (void*) undo.down);
+						free ( (void*) save.up);
+						free ( (void*) save.down);
+						return;
+						break;
 				}
 			}
 
@@ -165,17 +232,6 @@ void playgame()
 			{
 
 			}
-
-					// gets the number from drawdice
-					// if any of the 4 geeties can move
-						// get users input by mouse
-						// if users cords has any geeti and has its own geeti
-							// then check if that geeti can move
-							// if yes then move that geeti
-								// if that geeti has killed another then send the other geeti home
-								// if geeti comes to finish then
-									// if all geetis are on finish then finished = 1
-						// if no then get user's input again
 		}
 	//If player isn't supposed to roll die again, next player's turn comes
 	if (!turnagain)
@@ -184,6 +240,8 @@ void playgame()
 	//After turn of the 4th player, 1st player's turn should come
 	if (turn > 3)
 		turn = 0;
+	if (turn < 0)
+		turn = 3;
 
 	}while(!finished);
 }
@@ -218,8 +276,8 @@ int validmove(int cordx, int cordy, int dice, int playernum, int &movetox, int &
 		if( ( (cordx > 0 && cordx < 6 && cordy > 0 && cordy < 6)  ||
 			  (cordx > 8 && cordx < 14 && cordy > 0 && cordy < 6) ||
 			  (cordx > 0 && cordx < 6 && cordy > 8 && cordy < 14) || 
-			  (cordx > 0 && cordx < 6 && cordy > 0 && cordy < 6) ) &&
-			  dice != 6)
+			  (cordx > 8 && cordx < 14 && cordy > 8 && cordy < 14) ) &&
+			  dice == 6)
 			{
 				nextcords = nextblock(cordx,cordy,playernum);
 				if (board[nextcords.x][nextcords.y].top > 0 && board[nextcords.x][nextcords.y].player != playernum)
@@ -532,13 +590,7 @@ point getuserinput()
 				return output;
 			}
 			else
-			{
-				setfillstyle(SOLID_FILL, WHITE);
-				bar(0,ymax - 20, undo.coords[0][0] - 1, ymax);
-				setcolor(BLACK);
-				settextjustify(CENTER_TEXT, CENTER_TEXT);
-				outtextxy(ymax - 10, 10, "Please click on a piece on the board");
-			}
+				writestatus("Complete your turn first");
 		}
 	}while(1); //Infinite loop
 }
@@ -574,10 +626,12 @@ int rolldie(int playerturn)
 	randomize();
 	number = 1 + rand() % 6;
 	
-//	rectangle(0, 0, boardgraf.left - 5, (boardgraf.blocksize * 15) / 2 +  boardgraf.top );
-//	rectangle(0, (boardgraf.blocksize * 15) / 2 +  boardgraf.top , boardgraf.left - 5, (boardgraf.blocksize * 15) +  boardgraf.top + 5);
-//	rectangle(boardgraf.left + boardgraf.blocksize * 15 + 5, 0, xmax , (boardgraf.blocksize * 15) / 2 +  boardgraf.top);
-//	rectangle(boardgraf.left + boardgraf.blocksize * 15 + 5, (boardgraf.blocksize * 15) / 2 +  boardgraf.top , xmax , (boardgraf.blocksize * 15) +  boardgraf.top + 5);
+	setfillstyle(SOLID_FILL, LIGHTGRAY);
+	bar( (boardgraf.left - 5) / 2 - 10, (boardgraf.blocksize * 15) / 2 +  boardgraf.top - 60, (boardgraf.left - 5) / 2 + 10, (boardgraf.blocksize * 15) / 2 +  boardgraf.top - 40);
+	bar( (boardgraf.left + boardgraf.blocksize * 15 + 5 + xmax) / 2 - 10, (boardgraf.blocksize * 15) / 2 +  boardgraf.top - 60, (boardgraf.left + boardgraf.blocksize * 15 + 5 + xmax) / 2 + 10, (boardgraf.blocksize * 15) / 2 +  boardgraf.top - 40);
+	bar( (boardgraf.left + boardgraf.blocksize * 15 + 5 + xmax) / 2 - 10, boardgraf.top + boardgraf.blocksize * 15 - 60, (boardgraf.left + boardgraf.blocksize * 15 + 5 + xmax) / 2 + 10, boardgraf.top + boardgraf.blocksize * 15 - 40);
+	bar( (boardgraf.left - 5) / 2 - 10, boardgraf.top + boardgraf.blocksize * 15 - 60, (boardgraf.left - 5) / 2 + 10, boardgraf.top + boardgraf.blocksize * 15 - 40);
+		
 	switch (playerturn)
 	{
 		case PLR_BLUE:
@@ -715,19 +769,12 @@ void drawscreenelements()
 	drawboard( boardgraf.left, boardgraf.top, boardgraf.blocksize);
 	
 	//Draw the bottom most message bar
-	setfillstyle(SOLID_FILL, WHITE);
-	bar(0, ymax - 20, undo.coords[0][0] - 1, ymax);	
-	setcolor(BLACK);
-	line(0, ymax - 21, xmax, ymax - 21);
-	line(undo.coords[0][0] - 1, ymax - 20, undo.coords[0][0] - 1, ymax);
-
+	writestatus(" ");
+		
 	for (j = 0; j <= 3; j++)
 		if (player[j].type != TYPE_NONE)
 			for (i = 0; i <= 3; i++)
-			{
 				draw_block_pieces(player[j].piece[i].location.x, player[j].piece[i].location.y);
-				getch();
-			}
 }
 
 int getuseroption(int playerturn)
@@ -792,7 +839,7 @@ int getuseroption(int playerturn)
 					setfillstyle( SOLID_FILL, LIGHTGRAY);
 					bar(left, top, left + 50, top + 20);
 					show_mouse();
-					return 1;
+					return ROLLDIE;
 				}
 				
 				//If undo is clicked
@@ -807,7 +854,7 @@ int getuseroption(int playerturn)
 					show_mouse();
 					
 					//-----Undo statements here
-					return 0;
+					return UNDO;
 				}
 				
 				//If save is clicked
@@ -822,7 +869,7 @@ int getuseroption(int playerturn)
 					show_mouse();
 					
 					//-----Save statements here
-					return 0;
+					return SAVE;
 				}
 				
 				//If Help is clicked
@@ -837,7 +884,7 @@ int getuseroption(int playerturn)
 					show_mouse();
 					
 					//-----Help statements here
-					return 0;
+					return HELP;
 				}
 				
 				//If Quit is clicked
@@ -852,7 +899,7 @@ int getuseroption(int playerturn)
 					show_mouse();
 					
 					//-----Quit statements here
-					return 0;
+					return QUIT;
 				}
 			}
 		}while(1); //Infinite loop
@@ -879,6 +926,28 @@ void sendhome(int cordx, int cordy)
 	player[playernum].piece[piece].status = ST_ATHOME;
 	player[playernum].piece[piece].location.x = puttox;
 	player[playernum].piece[piece].location.y = puttoy;
+}
+
+void savegame()
+{
+	int i,j;
+	fstream file("save.lud",ios::out);
+
+	file.write((char*)&turn, sizeof turn);
+
+	for (i = 0; i <= 3; i++)
+	{
+		file.write((char*)&player[i].type, sizeof player[i].type);
+		
+		for (j = 0; j <= 3; j++)
+		{	
+			file.write( (char*)&player[i].piece[j].status, sizeof player[i].piece[j].status);
+			file.write( (char*)&player[i].piece[j].location, sizeof player[i].piece[j].location);
+		}
+	}
+	
+	file.close();
+	return;	
 }
 
 int brd_pop(Board& block)
@@ -919,4 +988,62 @@ void brd_push(Board& block, int playernum, int piece)
 	block.top++;
 	block.pieces[block.top] = piece;
 	return;
+}
+
+void addundo(int turn, int fromx, int fromy, int tox, int toy, int boolkilled, int playerkilled, int piecekilled )
+{
+	if (undotail == NULL)
+	{
+		//If its first move then make a new node
+		undotail = new undonode;
+		undotail->prev = NULL;
+	}
+	else
+	{
+		//Add new node
+			undonode *tempnode = new undonode;
+			tempnode->prev = undotail;
+			undotail = tempnode;
+	}
+
+	//Assign values to node
+	undotail->playerturn = turn;
+	undotail->fromx = fromx;
+	undotail->fromy = fromy;
+	undotail->tox = tox;
+	undotail->toy = toy;
+	undotail->boolkilled = boolkilled;
+	undotail->playerkilled = playerkilled;
+	undotail->piecekilled = piecekilled;
+}
+
+void doundo()
+{
+	if (undotail == NULL)
+	{
+		writestatus("There is no move to undo");
+		delay(100);
+		return;
+	}
+
+	//Move the pieces back according to values stored in the node
+	movepiece(undotail->tox, undotail->toy, undotail->fromx, undotail->fromy);
+	if(undotail->boolkilled == TRUE)
+	{
+		movepiece(player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.x, player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.y,
+				  undotail->tox, undotail->toy);
+		drawblock(player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.x, player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.y);
+	}
+	turn = undotail->playerturn;
+
+	drawblock(undotail->fromx,undotail->fromy);
+	drawblock(undotail->tox,undotail->toy);
+	draw_block_pieces(undotail->fromx,undotail->fromy);
+	draw_block_pieces(undotail->tox,undotail->toy);
+
+	//Delete the last node, just before the tail
+	undonode *tempnode;
+	tempnode = undotail;
+	undotail = tempnode->prev;
+	delete tempnode;
 }

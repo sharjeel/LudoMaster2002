@@ -11,6 +11,7 @@
 /* Global Vars */
 Board board[15][15];
 PlayerInfo player[4];
+int turn;
 
 /* Function prototypes */
 void initgraphics();
@@ -23,11 +24,12 @@ void main()
 	initvars();
 	initgraphics();
 	showlogo();
-	while(!mainoptions());
-	playgame();
-	getch();
-	getch();
-
+	
+	do
+	{
+		while(!mainoptions());
+		playgame();
+	}while(1); //Infinite loop
 }
 
 void initgraphics()
