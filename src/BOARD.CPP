@@ -195,7 +195,7 @@ void draw_block_pieces(int cordx, int cordy)
 	switch (nopieces)
 	{
 		case 1:
-			radius = boardgraf.blocksize /2 - 2;
+			radius = boardgraf.blocksize /3 - 2;
 			x = boardgraf.left + boardgraf.blocksize * cordx + boardgraf.blocksize/2;
 			y = boardgraf.top + boardgraf.blocksize * cordy + boardgraf.blocksize/2;
 			piecedraw(x, y, radius, color);
@@ -330,10 +330,10 @@ void drawblock(int cordx, int cordy)
 	
 	//When block is of home just vanish the portion of piece
 	setcolor(WHITE);
-	for(int i = 0; i <= boardgraf.blocksize /2; i++)
+	for(int i = 0; i < boardgraf.blocksize /2; i++)
 		circle( boardgraf.left + boardgraf.blocksize * cordx + boardgraf.blocksize /2,
 				boardgraf.top + boardgraf.blocksize * cordy + boardgraf.blocksize /2,
-				boardgraf.blocksize /2);
+				i);
 }
 
 void circblock(int cordx, int cordy, int color, int boundcol)

@@ -79,7 +79,7 @@ void piecedraw(int x, int y, int radius, int color)
 	setcolor(color);
 	//Draw the inner colored portion
 	for (i = 0; i <= radius; i++)
-		circle(x, y, radius);
+		circle(x, y, i);
 	
 	//Draw the outer black boundary
 	setcolor(BLACK);

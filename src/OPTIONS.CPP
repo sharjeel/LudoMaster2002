@@ -487,11 +487,11 @@ void new_game_vars()
 		for(j = 0; j <= 14; j++)
 				board[i][j].top = -1;
 
+	for (i = 0; i <= 3; i++)
+		for(j = 0; j <= 3; j++)
+			player[i].piece[j].status = ST_ATHOME;
+					
 	//Set home positions of blue geetees
-	player[PLR_BLUE].piece[0].status = ST_ATHOME;
-	player[PLR_BLUE].piece[1].status = ST_ATHOME;
-	player[PLR_BLUE].piece[2].status = ST_ATHOME;
-	player[PLR_BLUE].piece[3].status = ST_ATHOME;
 	player[PLR_BLUE].piece[0].location.x = 1; 
 	player[PLR_BLUE].piece[0].location.y = 1;
 	player[PLR_BLUE].piece[1].location.x = 4; 
@@ -506,10 +506,6 @@ void new_game_vars()
 	board[4][4].top = 0;	board[4][4].pieces[0] = 3;	board[4][4].player = PLR_BLUE;
 	
 	//Set home positions of green geetees
-	player[PLR_GREEN].piece[0].status = ST_ATHOME;
-	player[PLR_GREEN].piece[1].status = ST_ATHOME;
-	player[PLR_GREEN].piece[2].status = ST_ATHOME;
-	player[PLR_GREEN].piece[3].status = ST_ATHOME;
 	player[PLR_GREEN].piece[0].location.x = 10; 
 	player[PLR_GREEN].piece[0].location.y = 1;
 	player[PLR_GREEN].piece[1].location.x = 13; 

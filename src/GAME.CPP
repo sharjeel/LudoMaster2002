@@ -28,8 +28,8 @@ void sendhome(int, int);
 int validmove(int, int, int, int, int&, int&);
 point nextblock(int, int, int);
 point getuserinput();
-int brd_pop(Board);
-void brd_push(Board, int, int);
+int brd_pop(Board&);
+void brd_push(Board&, int, int);
 
 void playgame()
 {
@@ -81,25 +81,27 @@ void playgame()
 					case 1:
 						//User has rolled die
 						dice = rolldie(turn);
-						if (dice == 6)
-							turnagain = TRUE;
-						
+
 						//Check which pieces can move and which can't
 						for(i = 0; i <= 3; i++)
 						{
-							player[turn].piece[i].canmove = FALSE;							
+							player[turn].piece[i].canmove = FALSE;
 							if (validmove( player[turn].piece[i].location.x, player[turn].piece[i].location.y, dice, turn, player[turn].piece[i].moveto.x, player[turn].piece[i].moveto.y))
 							{
 								player[turn].piece[i].canmove = TRUE;
 							}
 						}
-		
+
 						//If none of the move of the user can move then skip his/her turn
 						if( player[turn].piece[0].canmove == TRUE ||
 							player[turn].piece[1].canmove == TRUE ||
 							player[turn].piece[2].canmove == TRUE ||
 							player[turn].piece[3].canmove == TRUE 	)
 						{
+
+							if (dice == 6)
+								turnagain = TRUE;
+
 
 							//Get user's input for a location on board using mouse
 							//If that location is occupied, and is occupied by his on piece and that piece can move then
@@ -111,11 +113,11 @@ void playgame()
 							}while(	!(board[usermove.x][usermove.y].top >= 0 &&
 									  board[usermove.x][usermove.y].player == turn &&
 									  player[turn].piece[piece_to_move].canmove == TRUE));
-							
+
 							//Move that piece
 							{		  
 								//If there is already a piece sitting on that part, send it to home first (kill it)
-								if(board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].top >= 0 && 
+								if(board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].top >= 0 &&
 									board[player[turn].piece[piece_to_move].location.x][player[turn].piece[piece_to_move].moveto.y].player != turn)
 								{	
 									//---Send the geetee to home----//
@@ -123,7 +125,14 @@ void playgame()
 								}	
 								
 								movepiece(usermove.x, usermove.y, player[turn].piece[piece_to_move].moveto.x, player[turn].piece[piece_to_move].moveto.y);
+								hide_mouse();
+								drawblock(usermove.x, usermove.y);
+								draw_block_pieces(usermove.x, usermove.y);
+								show_mouse();
+
+
 								//If piece lands on finished then turnagain = TRUE, also check if all pieces have finished. If yes then end game saying who has won
+								//Otherwise just draw that piece on the baord
 								if (player[turn].piece[piece_to_move].location.x >= 6 && player[turn].piece[piece_to_move].location.x <= 8 &&
 									player[turn].piece[piece_to_move].location.y >= 6 && player[turn].piece[piece_to_move].location.y <= 8)
 								{
@@ -137,21 +146,15 @@ void playgame()
 											finished = FALSE;																					
 									}
 								}
-							}
-														
-							/*	//Get user's input by mouse and move the piece after checking it
-								do
+								else
 								{
-									//Write in info bar
-									setfillstyle(SOLID_FILL, WHITE);
-									bar(0,ymax - 20, undo.coords[0][0] - 1, ymax);
-									setcolor(BLACK);
-									settextjustify(CENTER_TEXT, CENTER_TEXT);
-									outtextxy(ymax - 10, 10, "Please click on a piece on the board that can move");
-									
-									//Board coords clicked by the user
-									usermove = getuserinput();
-								}while(!board[usermove.x][usermove.y]);*/					
+									//Draw the piece on its new location
+									hide_mouse();
+									drawblock(player[turn].piece[piece_to_move].moveto.x, player[turn].piece[piece_to_move].moveto.y);
+									draw_block_pieces(player[turn].piece[piece_to_move].moveto.x, player[turn].piece[piece_to_move].moveto.y);
+									show_mouse();							
+								}
+							}														
 						}
 
 					break;
@@ -175,7 +178,8 @@ void playgame()
 						// if no then get user's input again
 		}
 	//If player isn't supposed to roll die again, next player's turn comes
-	turn++;
+	if (!turnagain)
+		turn++;
 
 	//After turn of the 4th player, 1st player's turn should come
 	if (turn > 3)
@@ -190,27 +194,39 @@ int validmove(int cordx, int cordy, int dice, int playernum, int &movetox, int &
 
 	int i, valid;
 
-	// if not users cords has any piece or not has its own piece
+	// if not user's cords has any piece or not has its own piece
 	if (board[cordx][cordy].top == -1)
 		return FALSE;
 	if (board[cordx][cordy].player != playernum)
 		return FALSE;
-
+	
+	// if piece has finished then it can't move
+	if (cordx >= 6 && cordx <= 	8 && cordy >= 6 && cordy <= 8)
+		return FALSE;
+	
 	// Check if that piece can move
 
 		//if piece is at home and dice is not six then that piece can't move
-		if (!((cordx >= 0 && cordx <= 14 && cordy <=6 && cordy >= 8) || 
-			  (cordx >= 6 && cordx <= 8 && cordy <= 0 && cordy >= 14))
-				 && (dice != 6))
-			return 0;
+		if( ( (cordx > 0 && cordx < 6 && cordy > 0 && cordy < 6)  ||
+			  (cordx > 8 && cordx < 14 && cordy > 0 && cordy < 6) ||
+			  (cordx > 0 && cordx < 6 && cordy > 8 && cordy < 14)  || 
+			  (cordx > 0 && cordx < 6 && cordy > 0 && cordy < 6) ) &&
+			  dice != 6)
+			return FALSE;
 
 		//if piece is at home and dice IS six then that piece can move providced there is not doublee at his home
-		if (!((cordx >= 0 && cordx <= 14 && cordy <=6 && cordy >= 8) || (cordx >= 6 && cordx <= 8 && cordy <= 0 && cordy >= 14))
-			 && (dice == 6))
+		if( ( (cordx > 0 && cordx < 6 && cordy > 0 && cordy < 6)  ||
+			  (cordx > 8 && cordx < 14 && cordy > 0 && cordy < 6) ||
+			  (cordx > 0 && cordx < 6 && cordy > 8 && cordy < 14) || 
+			  (cordx > 0 && cordx < 6 && cordy > 0 && cordy < 6) ) &&
+			  dice != 6)
 			{
 				nextcords = nextblock(cordx,cordy,playernum);
-				if (board[nextcords.x][nextcords.y]. top <= 0)
+				if (board[nextcords.x][nextcords.y].top > 0 && board[nextcords.x][nextcords.y].player != playernum)
+					return FALSE;
+				else
 				{
+					nextcords = nextblock(cordx, cordy, playernum);
 					movetox = nextcords.x;
 					movetoy = nextcords.y;
 					return TRUE;
@@ -237,8 +253,8 @@ int validmove(int cordx, int cordy, int dice, int playernum, int &movetox, int &
 		}
 
 		//At this spot we've got the coordinates where the piece may come to rest
-		//Check if there is star and is occupied
-		if (board[nextcords.x][nextcords.y].top >= 0 &&
+		//Check if there is star and is occupied by someone else
+		if (board[nextcords.x][nextcords.y].top >= 0 && board[nextcords.x][nextcords.y].player != playernum &&
 			((nextcords.x == 2  && nextcords.y == 8 ) ||
 			 (nextcords.x == 6  && nextcords.y == 2 ) ||
 			 (nextcords.x == 11 && nextcords.y == 6 ) ||
@@ -248,7 +264,7 @@ int validmove(int cordx, int cordy, int dice, int playernum, int &movetox, int &
 
 
 		//Check if there is star and its not player's personal star
-		if (board[nextcords.x][nextcords.y].top == 0 &&
+		if (board[nextcords.x][nextcords.y].top == 0 && board[nextcords.x][nextcords.y].player != playernum &&
 			((nextcords.x == 1  && nextcords.y == 6 && playernum != PLR_BLUE ) ||
 			 (nextcords.x == 8  && nextcords.y == 1 && playernum != PLR_GREEN) ||
 			 (nextcords.x == 13 && nextcords.y == 8 && playernum != PLR_RED) ||
@@ -288,16 +304,16 @@ point nextblock(int cordx, int cordy, int playernum)
 	//Set starting point for red's home
 	if(cordx >= 9 && cordx <= 14 && cordy >= 9 && cordy <= 14)
 	{
-		output.x = 1;
-		output.y = 6;
+		output.x = 13;
+		output.y = 8;
 		return output;
 	}
 
 	//Set starting point for yellow's home
 	if(cordx >= 0 && cordx <= 5 && cordy >= 9 && cordy <= 14)
 	{
-		output.x = 1;
-		output.y = 6;
+		output.x = 8;
+		output.y = 13;
 		return output;
 	}
 
@@ -330,6 +346,12 @@ point nextblock(int cordx, int cordy, int playernum)
 			return output;
 		}
 	}
+	if (cordy == 7 && cordx >= 1 && cordx <= 5)
+	{
+		output.x = cordx + 1;
+		output.y = cordy;		
+		return output;
+	}
 	if (cordy == 6 && cordx >= 0 && cordx <= 4)
 	{
 		output.x = cordx + 1;
@@ -342,9 +364,8 @@ point nextblock(int cordx, int cordy, int playernum)
 		output.x = cordx + 1;
 		output.y = cordy - 1;
 		return output;
-
 	}
-
+	
 	//Set next coords in green's area
 	if (cordy >= 1 && cordy <= 5 && cordx == 6)
 	{
@@ -374,6 +395,12 @@ point nextblock(int cordx, int cordy, int playernum)
 			return output;
 		}
 	}
+	if (cordy >= 1 && cordy <= 5 && cordx == 7)
+	{
+		output.x = cordx;
+		output.y = cordy + 1;
+		return output;
+	}
 	if (cordx == 8 && cordy >= 0 && cordy <= 4)
 	{
 		output.x = cordx;
@@ -401,7 +428,7 @@ point nextblock(int cordx, int cordy, int playernum)
 		output.y = cordy + 1;
 		return output;
 	}
-	if (cordx == 14 && cordy == 0)
+	if (cordx == 14 && cordy == 7)
 	{
 		if (playernum == PLR_RED)
 		{
@@ -417,13 +444,19 @@ point nextblock(int cordx, int cordy, int playernum)
 			return output;
 		}
 	}
-	if (cordy == 8 && cordx >= 9 && cordy <= 13)
+	if (cordx >= 9 && cordx <= 13 && cordy == 7)
 	{
 		output.x = cordx - 1;
 		output.y = cordy;
 		return output;
 	}
-	if (cordx == 8 && cordy == 8)
+	if (cordy == 8 && cordx >= 10 && cordx <= 14)
+	{
+		output.x = cordx - 1;
+		output.y = cordy;
+		return output;
+	}
+	if (cordx == 9  && cordy == 8)
 	{
 		output.x = cordx - 1;
 		output.y = cordy + 1;
@@ -437,7 +470,7 @@ point nextblock(int cordx, int cordy, int playernum)
 		output.y = cordy + 1;
 		return output;
 	}
-	if (cordx == 8 && cordy == 13)
+	if (cordx == 8 && cordy == 14)
 	{
 		output.x = cordx - 1;
 		output.y = cordy;
@@ -459,7 +492,13 @@ point nextblock(int cordx, int cordy, int playernum)
 			return output;
 		}
 	}
-	if (cordx == 6 && cordy >= 6 && cordy <= 14)
+	if (cordy >= 9 && cordy <= 13 && cordx == 7)
+	{
+		output.x = cordx;
+		output.y = cordy - 1;
+		return output;
+	}
+	if (cordx == 6 && cordy >= 10 && cordy <= 14)
 	{
 		output.x = cordx;
 		output.y = cordy - 1;
@@ -486,10 +525,10 @@ point getuserinput()
 		read_mouse(&mouse);
 		if (button_press(LEFT_BUTTON, &mouse))
 		{
-			if (mouse.x > boardgraf.left && mouse.x < boardgraf.left + boardgraf.blocksize * 15 && mouse.y < boardgraf.top && mouse.y < boardgraf.top + boardgraf.blocksize * 15)
+			if (mouse.x > boardgraf.left && mouse.x < boardgraf.left + boardgraf.blocksize * 15 && mouse.y > boardgraf.top && mouse.y < boardgraf.top + boardgraf.blocksize * 15)
 			{
-				output.x = mouse.x - boardgraf.left / 15;
-				output.y = mouse.y - boardgraf.left / 15;
+				output.x = (mouse.x - boardgraf.left) / boardgraf.blocksize;
+				output.y = (mouse.y - boardgraf.top) / boardgraf.blocksize;
 				return output;
 			}
 			else
@@ -508,15 +547,20 @@ void movepiece(int fromx, int fromy, int tox, int toy)
 {
 	//------------
 	if(board[fromx][fromy].top <0)
+		{
+		gotoxy(1,1);
 		cout << "errorrrr!!!!!!!!!!!!!!!!!!!! while calling movepiece";
+		getch();
+		return;
+		}
 	//-----------
 		
 	int playernum = board[fromx][fromy].player;
 	int piece =	brd_pop(board[fromx][fromy]);
 	brd_push(board[tox][toy], playernum,piece);
 	player[playernum].piece[piece].location.x = tox;
-	player[playernum].piece[piece].location.y = tox;
-	player[playernum].piece[piece].status = ST_ATHOME;
+	player[playernum].piece[piece].location.y = toy;
+	player[playernum].piece[piece].status = ST_ONBOARD;
 }
 
 void undomove()
@@ -676,7 +720,7 @@ void drawscreenelements()
 	setcolor(BLACK);
 	line(0, ymax - 21, xmax, ymax - 21);
 	line(undo.coords[0][0] - 1, ymax - 20, undo.coords[0][0] - 1, ymax);
-	
+
 	for (j = 0; j <= 3; j++)
 		if (player[j].type != TYPE_NONE)
 			for (i = 0; i <= 3; i++)
@@ -834,11 +878,12 @@ void sendhome(int cordx, int cordy)
 	player[playernum].piece[piece].location.y = puttoy;
 }
 
-int brd_pop(Board block)
+int brd_pop(Board& block)
 {
 	//-----
 		if (block.top == -1)
 		{
+			gotoxy (1,1);
 			cout << "Logical error while calling brd_pop()";
 		}
 	//-----
@@ -850,14 +895,16 @@ int brd_pop(Board block)
 	return output;
 }
 
-void brd_push(Board block, int playernum, int piece)
+void brd_push(Board& block, int playernum, int piece)
 {
 	//-----
 		if (block.top >= 4)
 		{
+			gotoxy(1,1);
 			cout << "Logical error while calling brd_push()";
 			return;
 		}
+		
 		if (block.top != -1 && block.player != playernum)
 		{
 			cout << "ek he jagah par do geetian bithanay ki nakam koshish!!!!";

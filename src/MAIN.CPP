@@ -1,4 +1,5 @@
 #include "vars.h"
+#include "board.h"
 #include "options.h"
 #include "game.h"
 #include "grafix.h"
