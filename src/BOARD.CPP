@@ -365,6 +365,49 @@ void drawblock(int cordx, int cordy)
 				boardgraf.blocksize /2 - 1);
 }
 
+
+void brd_push(Board& block, int playernum, int piece)
+{
+/*	//-----
+		if (block.top >= 4)
+		{
+			gotoxy(1,1);
+			cout << "Logical error while calling brd_push()";
+			return;
+		}
+		
+		if (block.top != -1 && block.player != playernum)
+		{
+			cout << "ek he jagah par do geetian bithanay ki nakam koshish!!!!";
+			return;	
+		}
+	//-----*/
+		
+	block.player = playernum;
+	block.top++;
+	block.pieces[block.top] = piece;
+	return;
+}
+
+int brd_pop(Board& block)
+{
+/*	//-----
+		if (block.top == -1)
+		{
+			gotoxy (1,1);
+			cout << "Logical error while calling brd_pop()";
+		}
+	//-----*/
+		
+	int output;
+	
+	output = block.pieces[block.top];
+	block.top --;
+	return output;
+}
+
+
+
 void circblock(int cordx, int cordy, int color, int boundcol)
 {
 	int i;

@@ -1,1 +1,1 @@
-e:\borlandc\bin\bc
+D:\borlandc\bin\bc

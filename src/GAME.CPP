@@ -55,8 +55,8 @@ int rolldie(int);
 void savegame();
 point nextblock(int, int, int);
 point getuserinput();
-int brd_pop(Board&);
-void brd_push(Board&, int, int);
+point computermove(int, int);
+point prevblock(int , int);
 void addundo(int,int,int,int,int,int,int,int);
 void doundo();
 
@@ -196,6 +196,11 @@ void playgame()
 								}
 							}														
 						}
+						else
+						{
+							writestatus("None can move");
+							delay(500);
+						}
 						break;
 					case UNDO:
 						doundo();
@@ -230,20 +235,152 @@ void playgame()
 
 			if (player[turn].type == TYPE_COMPUTER)
 			{
+				//Computer rolls the die
+						dice = rolldie(turn);
 
+						//Check which pieces can move and which can't
+						for(i = 0; i <= 3; i++)
+						{
+							player[turn].piece[i].canmove = FALSE;
+							if (validmove( player[turn].piece[i].location.x, player[turn].piece[i].location.y, dice, turn, player[turn].piece[i].moveto.x, player[turn].piece[i].moveto.y))
+							{
+								player[turn].piece[i].canmove = TRUE;
+							}
+						}
+
+						//If none of the move of the computer can move then skip his/her turn
+						if( player[turn].piece[0].canmove == TRUE ||
+							player[turn].piece[1].canmove == TRUE ||
+							player[turn].piece[2].canmove == TRUE ||
+							player[turn].piece[3].canmove == TRUE 	)
+						{
+
+							writestatus("Computer is thinking");
+							delay(1000);
+							
+							if (dice == 6)
+								turnagain = TRUE;
+
+							//Think of a move
+								usermove = computermove(dice, turn);
+								piece_to_move = board[usermove.x][usermove.y].pieces[board[usermove.x][usermove.y].top];
+
+							//Move that piece
+							{		  
+								//If there is already a piece sitting on that part, send it to home first (kill it)
+								boolkilledpiece = FALSE;
+								if(board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].top >= 0 &&
+									board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].player != turn)
+								{	
+									playerkilled = board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].player;
+									piecekilled = board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].pieces[0];
+									homeaddress.x = player[playerkilled].piece[piecekilled].homelocation.x;
+									homeaddress.y = player[playerkilled].piece[piecekilled].homelocation.y;
+									sendhome(player[playerkilled].piece[piecekilled].location.x, player[playerkilled].piece[piecekilled].location.y);
+									drawblock(homeaddress.x, homeaddress.y);
+									draw_block_pieces(homeaddress.x, homeaddress.y);
+									turnagain = TRUE;
+									boolkilledpiece = TRUE;
+								}	
+								
+								//Keep track for undopurpose
+								addundo(turn, usermove.x, usermove.y, player[turn].piece[piece_to_move].moveto.x, player[turn].piece[piece_to_move].moveto.y,
+										boolkilledpiece, playerkilled, piecekilled);
+								
+								//Change board coordinates of piece and show on screen
+								movepiece(usermove.x, usermove.y, player[turn].piece[piece_to_move].moveto.x, player[turn].piece[piece_to_move].moveto.y);
+								hide_mouse();
+								drawblock(usermove.x, usermove.y);
+								draw_block_pieces(usermove.x, usermove.y);
+								show_mouse();
+
+
+								//If piece lands on finished then turnagain = TRUE, also check if all pieces have finished. If yes then end game saying who has won
+								//Otherwise just draw that piece on the baord
+								if (player[turn].piece[piece_to_move].location.x >= 6 && player[turn].piece[piece_to_move].location.x <= 8 &&
+									player[turn].piece[piece_to_move].location.y >= 6 && player[turn].piece[piece_to_move].location.y <= 8)
+								{
+									turnagain = TRUE;
+									player[turn].piece[piece_to_move].status = ST_FINISHED;
+									
+									finished = TRUE;
+									for(i = 0; i<= 3; i++)
+									{
+										if(player[turn].piece[i].status != ST_FINISHED)
+											finished = FALSE;																					
+									}
+								}
+								else
+								{
+									//Draw the piece on its new location
+									hide_mouse();
+									drawblock(player[turn].piece[piece_to_move].moveto.x, player[turn].piece[piece_to_move].moveto.y);
+									draw_block_pieces(player[turn].piece[piece_to_move].moveto.x, player[turn].piece[piece_to_move].moveto.y);
+									show_mouse();							
+								}
+							}														
+						}
+						else
+						{
+							writestatus("None can move");
+							delay(500);
+						}
+				
 			}
 		}
-	//If player isn't supposed to roll die again, next player's turn comes
-	if (!turnagain)
-		turn++;
+		//If player isn't supposed to roll die again, next player's turn comes
+		if (!turnagain)
+			turn++;
 
-	//After turn of the 4th player, 1st player's turn should come
-	if (turn > 3)
-		turn = 0;
-	if (turn < 0)
-		turn = 3;
-
+		//After turn of the 4th player, 1st player's turn should come
+		if (turn > 3)
+			turn = 0;
+		
 	}while(!finished);
+	
+	
+	//Show who has won
+	for (i = 0; i <= xmax; i++)
+	{
+		setcolor(DARKGRAY);
+		line(0,i,xmax,i);
+	}
+	setcolor(WHITE);
+	settextjustify(CENTER_TEXT,CENTER_TEXT);
+	
+	for (i = 0; i <= 4; i++)
+	{
+		finished = i;
+		for (int j = 0; j <= 4; j++)
+		{
+			if (player[i].piece[j].status != ST_FINISHED)	
+			{
+				finished = -1;
+				break;
+			}
+		}
+	}
+	
+	switch (finished)
+	{
+		case 0:
+			outtextxy(xmax /2, ymax /2, "Blue player has won");
+			break;
+		case 1:
+			outtextxy(xmax /2, ymax /2, "Green player has won");
+			break;
+		case 2:
+			outtextxy(xmax /2, ymax /2, "Red player has won");
+			break;
+		case 3:
+			outtextxy(xmax /2, ymax /2, "Yellow player has won");
+			break;
+		case -1:
+			outtextxy(xmax /2, ymax /2, "Game over!");
+			break;
+	}
+
+	getch();
 }
 
 int validmove(int cordx, int cordy, int dice, int playernum, int &movetox, int &movetoy)
@@ -571,6 +708,123 @@ point nextblock(int cordx, int cordy, int playernum)
 	}
 }
 
+
+point prevblock(int cordx, int cordy)
+{
+	/* This function will return the coordinates of a block's previous block on which a piece is residing */
+
+	point output;
+
+	/*First set the next position for the four kind of blocks of homes*/
+	//Set previous coords in blue's area
+	if (cordx == 5 && cordy == 8)
+	{
+		output.x = cordx - 1;
+		output.y = cordy + 1;
+		return output;	
+	}
+	if (cordx >= 0 && cordx <= 4 && cordy == 8)
+	{
+		output.x = cordx + 1;
+		output.y = cordy;
+		return output;
+	}
+	if (cordx == 0 && (cordy == 7 || cordy == 6))
+	{
+		output.x = cordx;
+		output.y = cordy + 1;
+		return output;
+	}
+	if (cordx >= 1 && cordx <= 5 && cordy == 6)
+	{
+		output.x = cordx - 1;
+		output.y = cordy;
+		return output;
+	}
+	
+	//Set previous coords in green's area
+	if (cordx == 6 && cordy == 5)
+	{
+		output.x = cordx - 1;
+		output.y = cordy + 1;
+		return output;	
+	}
+	if (cordy >= 0 && cordy <= 4 && cordx == 6)
+	{
+		output.x = cordx;
+		output.y = cordy + 1;
+		return output;
+	}
+	if (cordy == 0 && (cordx == 7 || cordx == 8))
+	{
+		output.x = cordx - 1;
+		output.y = cordy;
+		return output;
+	}
+	if (cordy >= 1 && cordy <= 5 && cordx == 8)
+	{
+		output.x = cordx;
+		output.y = cordy -1;
+		return output;
+	}
+
+	//Set previous coords in red's area
+	if (cordx == 9 && cordy == 6)
+	{
+		output.x = cordx - 1;
+		output.y = cordy - 1;
+		return output;	
+	}
+	if (cordx >= 7 && cordx <= 13 && cordy == 6)
+	{
+		output.x = cordx - 1;
+		output.y = cordy;
+		return output;
+	}
+	if (cordx == 13 && (cordy == 7 || cordy == 8))
+	{
+		output.x = cordx;
+		output.y = cordy - 1;
+		return output;
+	}
+	if (cordx >= 9 && cordx <= 13 && cordy == 8)
+	{
+		output.x = cordx + 1;
+		output.y = cordy;
+		return output;
+	}
+
+	//Set previous coords in yellow's area
+	if (cordx == 8 && cordy == 9)
+	{
+		output.x = cordx + 1;
+		output.y = cordy - 1;
+		return output;	
+	}
+	if (cordy >= 10 && cordy <= 13 && cordx == 8)
+	{
+		output.x = cordx;
+		output.y = cordy - 1;
+		return output;
+	}
+	if (cordy == 13 && (cordx == 6 || cordx == 7))
+	{
+		output.x = cordx + 1;
+		output.y = cordy;
+		return output;
+	}
+	if (cordy >= 9 && cordy <= 13 && cordx == 6)
+	{
+		output.x = cordx;
+		output.y = cordy -1;
+		return output;
+	}
+
+	output.x = cordx;
+	output.y = cordy;
+	return output;	
+}
+
 point getuserinput()
 {
 	int ymax = getmaxy();
@@ -652,7 +906,6 @@ int rolldie(int playerturn)
 			break;
 	}
 
-	number = getch() - 48;
 	drawdice(number, x, y, 20);
 	
 	return number;
@@ -695,13 +948,25 @@ void drawscreenelements()
 	
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 	setcolor(BLUE);
-	outtextxy(5,5,"Blue");
+	if(player[PLR_BLUE].type == TYPE_HUMAN)
+		outtextxy(5,5,"Blue");
+	if(player[PLR_BLUE].type == TYPE_COMPUTER)
+		outtextxy(5,5,"Computer");
 	setcolor(BLACK);
-	outtextxy(boardgraf.left + boardgraf.blocksize * 15 + 10, 5, "Green");
+	if(player[PLR_GREEN].type == TYPE_HUMAN)
+		outtextxy(boardgraf.left + boardgraf.blocksize * 15 + 10, 5, "Green");
+	if(player[PLR_GREEN].type == TYPE_COMPUTER)
+		outtextxy(boardgraf.left + boardgraf.blocksize * 15 + 10, 5, "Computer");
 	setcolor(RED);
-	outtextxy(boardgraf.left + boardgraf.blocksize * 15 + 10, (boardgraf.blocksize * 15) / 2 +  boardgraf.top + 5, "Red");
+	if(player[PLR_RED].type == TYPE_HUMAN)
+		outtextxy(boardgraf.left + boardgraf.blocksize * 15 + 10, (boardgraf.blocksize * 15) / 2 +  boardgraf.top + 5, "Red");
+	if(player[PLR_RED].type == TYPE_COMPUTER)
+		outtextxy(boardgraf.left + boardgraf.blocksize * 15 + 10, (boardgraf.blocksize * 15) / 2 +  boardgraf.top + 5, "Computer");
 	setcolor(YELLOW);
-	outtextxy(5,(boardgraf.blocksize * 15) / 2 +  boardgraf.top + 5, "Yellow"); 
+	if(player[PLR_YELLOW].type == TYPE_HUMAN)
+		outtextxy(5,(boardgraf.blocksize * 15) / 2 +  boardgraf.top + 5, "Yellow"); 
+	if(player[PLR_YELLOW].type == TYPE_COMPUTER)
+		outtextxy(5,(boardgraf.blocksize * 15) / 2 +  boardgraf.top + 5, "Computer"); 
 
 	/* Draw buttons */
 	size = imagesize(0,0,80,20);	
@@ -790,6 +1055,20 @@ int getuseroption(int playerturn)
 //	rectangle(boardgraf.left + boardgraf.blocksize * 15 + 5, 0, xmax , (boardgraf.blocksize * 15) / 2 +  boardgraf.top);
 //	rectangle(boardgraf.left + boardgraf.blocksize * 15 + 5, (boardgraf.blocksize * 15) / 2 +  boardgraf.top , xmax , (boardgraf.blocksize * 15) +  boardgraf.top + 5);
 	
+	//Vanish all the roll buttons first
+	setfillstyle(SOLID_FILL, LIGHTGRAY);
+	left = (boardgraf.left - 5) / 2 - 25;
+	top  = (boardgraf.blocksize * 15) / 2 +  boardgraf.top - 30;
+	bar(left, top, left + 50, top + 20);
+	left = (boardgraf.left + boardgraf.blocksize * 15 + 5 + xmax) / 2 - 25;
+	top  = (boardgraf.blocksize * 15) / 2 +  boardgraf.top - 30;
+	bar(left, top, left + 50, top + 20);
+	left = (boardgraf.left + boardgraf.blocksize * 15 + 5 + xmax) / 2 - 25;
+	top  = boardgraf.blocksize * 15 +  boardgraf.top - 30;
+	bar(left, top, left + 50, top + 20);
+	left = (boardgraf.left - 5) / 2 - 25;
+	top  = boardgraf.blocksize * 15 +  boardgraf.top - 30;
+	bar(left, top, left + 50, top + 20);
 
 	if (player[playerturn].type == TYPE_HUMAN)
 	{
@@ -875,7 +1154,7 @@ int getuseroption(int playerturn)
 				}
 				
 				//If Help is clicked
-
+				if (mouse.x > help.coords[0][0] && mouse.x < help.coords[1][0] && mouse.y > help.coords[0][1] && mouse.y < help.coords[1][1])
 				{
 					hide_mouse();
 					putimage(help.coords[0][0], help.coords[0][1], help.down, 0);
@@ -885,7 +1164,7 @@ int getuseroption(int playerturn)
 					putimage(help.coords[0][0], help.coords[0][1], help.up, 0);
 					show_mouse();
 					
-					//-----Help statements here
+					writestatus("No help available at the moment    ");
 					return HELP;
 				}
 				
@@ -939,57 +1218,18 @@ void savegame()
 
 	for (i = 0; i <= 3; i++)
 	{
-		file.write((char*)&player[i].type, sizeof player[i].type);
+		file.write((char*)player[i].type, sizeof player[i].type);
 		
 		for (j = 0; j <= 3; j++)
 		{	
-			file.write( (char*)&player[i].piece[j].status, sizeof player[i].piece[j].status);
-			file.write( (char*)&player[i].piece[j].location, sizeof player[i].piece[j].location);
+			file.write( (char*)player[i].piece[j].status, sizeof player[i].piece[j].status);
+			file.write( (char*)player[i].piece[j].location.x, sizeof player[i].piece[j].location.x);
+			file.write( (char*)player[i].piece[j].location.y, sizeof player[i].piece[j].location.y);
 		}
 	}
 	
 	file.close();
 	return;	
-}
-
-int brd_pop(Board& block)
-{
-	//-----
-		if (block.top == -1)
-		{
-			gotoxy (1,1);
-			cout << "Logical error while calling brd_pop()";
-		}
-	//-----
-		
-	int output;
-	
-	output = block.pieces[block.top];
-	block.top --;
-	return output;
-}
-
-void brd_push(Board& block, int playernum, int piece)
-{
-	//-----
-		if (block.top >= 4)
-		{
-			gotoxy(1,1);
-			cout << "Logical error while calling brd_push()";
-			return;
-		}
-		
-		if (block.top != -1 && block.player != playernum)
-		{
-			cout << "ek he jagah par do geetian bithanay ki nakam koshish!!!!";
-			return;	
-		}
-	//-----
-		
-	block.player = playernum;
-	block.top++;
-	block.pieces[block.top] = piece;
-	return;
 }
 
 void addundo(int turn, int fromx, int fromy, int tox, int toy, int boolkilled, int playerkilled, int piecekilled )
@@ -1021,31 +1261,126 @@ void addundo(int turn, int fromx, int fromy, int tox, int toy, int boolkilled, i
 
 void doundo()
 {
-	if (undotail == NULL)
+    do
 	{
-		writestatus("There is no move to undo");
-		delay(100);
-		return;
+		if (undotail == NULL)
+		{
+			writestatus("There is no more move to undo");
+			delay(100);
+			return;
+		}
+
+		//Move the pieces back according to values stored in the node
+		movepiece(undotail->tox, undotail->toy, undotail->fromx, undotail->fromy);
+		if(undotail->boolkilled == TRUE)
+		{
+			movepiece(player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.x, player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.y,
+					undotail->tox, undotail->toy);
+			drawblock(player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.x, player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.y);
+		}
+		turn = undotail->playerturn;
+
+		drawblock(undotail->fromx,undotail->fromy);
+		drawblock(undotail->tox,undotail->toy);
+		draw_block_pieces(undotail->fromx,undotail->fromy);
+		draw_block_pieces(undotail->tox,undotail->toy);
+
+		//Delete the last node, just before the tail
+		undonode *tempnode;
+		tempnode = undotail;
+		undotail = tempnode->prev;
+		delete tempnode;
+	}while(player[turn].type != TYPE_HUMAN );
+}
+
+point computermove(int dice, int playerturn)
+{
+	const int VBAD = -500;
+	const int BAD = -400;
+	const int GOOD = 300;
+	const int EXCELLENT = 500;
+	const int VEXCELLENT = 700;
+	int piece_analysis[4] = {0, 0 , 0, 0};
+	int iterpiece, i, cordx, cordy;
+	point prevcord;
+	
+	for (iterpiece = 0; iterpiece <=3; iterpiece++)
+	{
+		if (player[playerturn].piece[iterpiece].canmove == TRUE	)
+		{
+			cordx = player[playerturn].piece[iterpiece].moveto.x;
+			cordy = player[playerturn].piece[iterpiece].moveto.y;
+			
+			/*Anaylyze the move*/
+				
+			//Getting out of home
+			if (dice == 6 && player[playerturn].piece[iterpiece].status == ST_ATHOME)
+				piece_analysis[iterpiece] += GOOD;
+				
+			//Killing other piece or doubling:
+			if (board[cordx][cordy].top == 0)
+			{
+				if (dice == 6)
+					piece_analysis[iterpiece] += GOOD;
+				else
+					piece_analysis[iterpiece] += EXCELLENT;
+			}
+
+			//Taking risk:
+			if (!(  (cordx == 1 && cordy == 6) ||
+					(cordx == 2 && cordy == 1) ||
+					(cordx == 6 && cordy == 1) ||
+					(cordx == 6 && cordy == 1) ||
+					(cordx == 6 && cordy == 1) ||
+					(cordx == 6 && cordy == 1) ||
+					(cordx == 6 && cordy == 1) ||
+					(cordx == 6 && cordy == 1) ))
+			{
+					prevcord.x = cordx;
+					prevcord.y = cordy;
+					for(i = 1; i <= 6; i++)
+					{
+						prevcord = prevblock(prevcord.x, prevcord.y);
+						if (board[prevcord.x][prevcord.y].top >= 0 && board[prevcord.x][prevcord.y].player != playerturn)
+						{
+							if (dice == 6)
+								piece_analysis[iterpiece] += BAD;
+							else
+								piece_analysis[iterpiece] += VBAD;
+						}
+					}
+			}		
+			else		
+				piece_analysis[iterpiece] = GOOD;
+		
+			//Surviving:
+			prevcord.x = player[playerturn].piece[iterpiece].location.x;
+			prevcord.y = player[playerturn].piece[iterpiece].location.y;
+			for(i = 1; i <= 6; i++)
+			{
+				prevcord = prevblock(prevcord.x, prevcord.y);
+				if (board[prevcord.x][prevcord.y].top >= 0 && board[prevcord.x][prevcord.y].player != playerturn && i + dice > 6)
+					piece_analysis[iterpiece] += EXCELLENT;					
+			}
+			//---- End of Analysis ----//
+		}
+		else
+		{
+			piece_analysis[iterpiece] = -1000;	
+		}
 	}
 
-	//Move the pieces back according to values stored in the node
-	movepiece(undotail->tox, undotail->toy, undotail->fromx, undotail->fromy);
-	if(undotail->boolkilled == TRUE)
+	//See which piece is better to move and return its coordinates
+	int	better = 0;
+	for (i = 0; i <= 3; i++)
 	{
-		movepiece(player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.x, player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.y,
-				  undotail->tox, undotail->toy);
-		drawblock(player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.x, player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.y);
+		if (piece_analysis[i] > piece_analysis[better])
+			better = i;
 	}
-	turn = undotail->playerturn;
-
-	drawblock(undotail->fromx,undotail->fromy);
-	drawblock(undotail->tox,undotail->toy);
-	draw_block_pieces(undotail->fromx,undotail->fromy);
-	draw_block_pieces(undotail->tox,undotail->toy);
-
-	//Delete the last node, just before the tail
-	undonode *tempnode;
-	tempnode = undotail;
-	undotail = tempnode->prev;
-	delete tempnode;
+	
+	point output;
+	output.x = player[playerturn].piece[better].location.x;
+	output.y = player[playerturn].piece[better].location.y;
+	return output;
+		
 }

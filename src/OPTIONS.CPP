@@ -1,6 +1,8 @@
 #include "mouse.h"
 #include "vars.h"
 #include "grafix.h"
+#include "board.h"
+#include "options.h"
 #include <conio.h>
 #include <graphics.h>
 #include <stdlib.h>
@@ -130,6 +132,7 @@ int mainoptions()
 							break;
 						case 1:
 							// Load game
+							new_game_vars();
 							return loadgame();
 							break;
 						case 2:
@@ -138,6 +141,7 @@ int mainoptions()
 							break;
 						case 3:
 							// About the author
+							showlogo();
 							return 0;
 							break;
 						case 4:                   	
@@ -498,11 +502,23 @@ int loadgame()
 		for (j = 0; j <= 3; j++)
 		{	
 			file.read( (char*)&player[i].piece[j].status, sizeof player[i].piece[j].status);
-			file.read( (char*)&player[i].piece[j].location, sizeof player[i].piece[j].location);
+			file.read( (char*)&player[i].piece[j].location, sizeof player[i].piece[j].location.x);
+			file.read( (char*)&player[i].piece[j].location, sizeof player[i].piece[j].location.x);
 		}
 	}
+
+	for (i = 0; i <= 14; i++)
+		for(j = 0; j <= 14; j++)
+				board[i][j].top = -1;
+				
+	for (i = 0; i <= 3; i++)
+		for(j = 0; j <= 3; j++)
+		{
+			brd_push(board[player[i].piece[j].location.x][player[i].piece[j].location.y] ,i ,j);
+		}
 	
 	file.close();
+	
 	return 1;
 }
 
@@ -579,26 +595,74 @@ void new_game_vars()
 
 void showlogo()
 {
+	struct bitfileheader
+	{
+		int  bfType;
+		long bfSize;
+		int  bfReserved1;
+		int  bfReserved2;
+		long bfOffBits;
+		long biSize;
+		long biWidth;
+		long biHeight;
+		int  biPlanes;
+		int  biBitCount;
+		long biCompression;
+		long biSizeImage;
+		long biXPelsPerMeter;
+		long biYPelsPerMeter;
+		long biClrUsed;
+		long byClrImportant;
+	};
+
 	int xmax = getmaxx();
 	int ymax = getmaxy();
+	bitfileheader testing;
+	palettetype pal;
+	getpalette(&pal);
+	int i, j;
+	char blue, green, red, pix1, pix2, pixel, alpha;
 	mouse_data mouse;
 
 	cleardevice();
-	
+
 	if(!init_mouse())
 	{
 		closegraph();
-		cout << "Mouse couldn't be initialised";	
+		cout << "Mouse couldn't be initialised";
 	}
-	
-	outtextxy(xmax/2 - 100, 100, "Ludo Master 2002");
-	outtextxy(xmax/2 - 150, 300, "By Sharjeel Ahmed Qureshi");
-	outtextxy(xmax/2 - 150, 400, "Press any key to continue");
-	
+
+	hide_mouse();
+
+	fstream bitmap("logo.saq", ios::in);
+
+	bitmap.read((char*)&testing, sizeof testing);
+
+	for (i = 0; i< pal.size; i++)
+	{
+		bitmap.read(&blue,1);
+		bitmap.read(&green,1);
+		bitmap.read(&red,1);
+		bitmap.read(&alpha,1);
+//		setrgbpalette(pal.colors[i],(int)red,(int)green,(int)blue);
+	}
+
+	for (i = 1; i<= testing.biHeight; i++)
+		for (j = 1; j <= testing.biWidth; j+=2)
+		{
+			bitmap.read(&pixel, 1);
+			pix1 = pixel & 0xF0;
+			pix1 >>= 4;
+			pix2 = pixel & 0x0F;
+			putpixel(j,   testing.biHeight - i,pix1);
+			putpixel(j+1, testing.biHeight - i,pix2);
+		}
+
+	show_mouse();
 	do
 	{
 		read_mouse(&mouse);
-	}while(!kbhit());
+	}while(!kbhit() || !button_press(LEFT_BUTTON, &mouse));
 		
 }
 

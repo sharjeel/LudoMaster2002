@@ -2,7 +2,7 @@
 #include <graphics.h>
 #include <string.h>
 #include <dos.h>
-
+	
 void writestatus(char*text)
 {
 	int xmax = getmaxx();

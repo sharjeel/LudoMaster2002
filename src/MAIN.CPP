@@ -1,3 +1,10 @@
+// *******************************************
+// * LUDO MASTER 2002:
+// *	Made by: Sharjeel Ahmed Qureshi
+// *				1340@nu.edu.pk
+// * Copyright (C) 2002, All Rights Reserved 
+// *******************************************
+
 #include "vars.h"
 #include "board.h"
 #include "options.h"
