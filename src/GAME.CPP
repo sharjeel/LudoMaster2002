@@ -146,7 +146,7 @@ void playgame()
 								//If there is already a piece sitting on that part, send it to home first (kill it)
 								boolkilledpiece = FALSE;
 								if(board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].top >= 0 &&
-									board[player[turn].piece[piece_to_move].location.x][player[turn].piece[piece_to_move].moveto.y].player != turn)
+									board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].player != turn)
 								{	
 									playerkilled = board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].player;
 									piecekilled = board[player[turn].piece[piece_to_move].moveto.x][player[turn].piece[piece_to_move].moveto.y].pieces[0];
@@ -154,7 +154,7 @@ void playgame()
 									homeaddress.y = player[playerkilled].piece[piecekilled].homelocation.y;
 									sendhome(player[playerkilled].piece[piecekilled].location.x, player[playerkilled].piece[piecekilled].location.y);
 									drawblock(homeaddress.x, homeaddress.y);
-									draw_block_pieces(homeaddress.y, homeaddress.y);
+									draw_block_pieces(homeaddress.x, homeaddress.y);
 									turnagain = TRUE;
 									boolkilledpiece = TRUE;
 								}	
@@ -652,7 +652,9 @@ int rolldie(int playerturn)
 			break;
 	}
 
+	number = getch() - 48;
 	drawdice(number, x, y, 20);
+	
 	return number;
 }
 
@@ -873,7 +875,7 @@ int getuseroption(int playerturn)
 				}
 				
 				//If Help is clicked
-				if (mouse.x > help.coords[0][0] && mouse.x < help.coords[1][0] && mouse.y > help.coords[0][1] && mouse.y < help.coords[1][1])
+
 				{
 					hide_mouse();
 					putimage(help.coords[0][0], help.coords[0][1], help.down, 0);
@@ -919,13 +921,13 @@ void sendhome(int cordx, int cordy)
 	//--------
 		
 	int playernum = board[cordx][cordy].player;
-	int piece =	brd_pop(board[cordx][cordy]);
-	int puttox = player[playernum].piece[piece].homelocation.x;
-	int puttoy = player[playernum].piece[piece].homelocation.y;
-	brd_push(board[puttox][puttoy], playernum,piece);
-	player[playernum].piece[piece].status = ST_ATHOME;
-	player[playernum].piece[piece].location.x = puttox;
-	player[playernum].piece[piece].location.y = puttoy;
+	int piecenum =	brd_pop(board[cordx][cordy]);
+	int puttox = player[playernum].piece[piecenum].homelocation.x;
+	int puttoy = player[playernum].piece[piecenum].homelocation.y;
+	brd_push(board[puttox][puttoy], playernum,piecenum);
+	player[playernum].piece[piecenum].status = ST_ATHOME;
+	player[playernum].piece[piecenum].location.x = puttox;
+	player[playernum].piece[piecenum].location.y = puttoy;
 }
 
 void savegame()

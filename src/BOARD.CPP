@@ -176,6 +176,10 @@ void draw_block_pieces(int cordx, int cordy)
 	if (nopieces == 0)
 		return;
 
+	//Donot draw pieces on finished area
+	if (cordx >= 6 && cordx <= 8 && cordy >= 6 && cordy <= 8)
+		return;
+
 	switch (board[cordx][cordy].player)
 	{
 		case PLR_BLUE:	
@@ -259,6 +263,10 @@ void draw_block_pieces(int cordx, int cordy)
 void drawblock(int cordx, int cordy)
 {
 	/* Check the phase of the block to be drawn */
+	
+	//Do not redraw finish area
+	if (cordx >= 6 && cordx <= 8 && cordy >= 6 && cordy <= 8)
+		return;
 	
 	//Block is in blue's playing area
 	if (cordx >= 0 && cordx <= 5 && cordy >= 6 && cordy <= 8)
