@@ -123,6 +123,7 @@ int mainoptions()
 					{
 						case 0:
 							// Start new game
+							new_game_vars();
 							return gameoptions();
 							break;
 						case 1:
@@ -499,10 +500,10 @@ void new_game_vars()
 	player[PLR_BLUE].piece[2].location.y = 4;
 	player[PLR_BLUE].piece[3].location.x = 4; 
 	player[PLR_BLUE].piece[3].location.y = 4;
-	board[1][1].top = 0; 	board[1][1].player = PLR_BLUE;
-	board[4][1].top = 0;	board[4][1].player = PLR_BLUE;
-	board[1][4].top = 0;	board[1][4].player = PLR_BLUE;
-	board[4][4].top = 0;	board[4][4].player = PLR_BLUE;
+	board[1][1].top = 0; 	board[1][1].pieces[0] = 0; 	board[1][1].player = PLR_BLUE;
+	board[4][1].top = 0;	board[4][1].pieces[0] = 1;	board[4][1].player = PLR_BLUE;
+	board[1][4].top = 0;	board[1][4].pieces[0] = 2;	board[1][4].player = PLR_BLUE;
+	board[4][4].top = 0;	board[4][4].pieces[0] = 3;	board[4][4].player = PLR_BLUE;
 	
 	//Set home positions of green geetees
 	player[PLR_GREEN].piece[0].status = ST_ATHOME;
@@ -517,10 +518,10 @@ void new_game_vars()
 	player[PLR_GREEN].piece[2].location.y = 4;
 	player[PLR_GREEN].piece[3].location.x = 13; 
 	player[PLR_GREEN].piece[3].location.y = 4;
-	board[10][1].top = 0; 	board[1][1].player = PLR_GREEN;
-	board[13][1].top = 0;	board[4][1].player = PLR_GREEN;
-	board[10][4].top = 0;	board[1][4].player = PLR_GREEN;
-	board[13][4].top = 0;	board[4][4].player = PLR_GREEN;
+	board[10][1].top = 0; 	board[10][1].pieces[0] = 0;		board[10][1].player = PLR_GREEN;
+	board[13][1].top = 0;	board[13][1].pieces[0] = 1;		board[13][1].player = PLR_GREEN;
+	board[10][4].top = 0;	board[10][4].pieces[0] = 2;		board[10][4].player = PLR_GREEN;
+	board[13][4].top = 0;	board[13][4].pieces[0] = 3;		board[13][4].player = PLR_GREEN;
 }
 
 void showlogo()

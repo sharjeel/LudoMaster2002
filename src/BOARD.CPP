@@ -170,10 +170,10 @@ void drawboard(int startx, int starty, int blocksize)
 void draw_block_pieces(int cordx, int cordy)
 {
 	int color;
-	int nopieces = boardgraf.top + 1;
+	int nopieces = board[cordx][cordy].top + 1;
 	int x,y,radius;
 
-	if (nopieces = 0)
+	if (nopieces == 0)
 		return;
 
 	switch (board[cordx][cordy].player)

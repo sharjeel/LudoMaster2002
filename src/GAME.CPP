@@ -52,8 +52,7 @@ void playgame()
 	drawscreenelements();
 	
 	show_mouse();
-	getch();
-	
+
 	do
 	{
 		turnagain = FALSE;
@@ -61,7 +60,7 @@ void playgame()
 		setfillstyle(SOLID_FILL, WHITE);
 		bar(0,ymax - 20, undo.coords[0][0] - 1, ymax);
 		setcolor(BLACK);
-		
+
 		//Check if the player is playing whose turn it is
 		if ( player[turn].type != TYPE_NONE )
 		{
@@ -77,7 +76,6 @@ void playgame()
 
 				//Get user's opiniom if he/she wants to roll the die or save/quit etc
 				option = getuseroption(turn);
-				getch();
 				switch (option)
 				{
 					case 1:
@@ -191,15 +189,9 @@ int validmove(int cordx, int cordy, int dice, int playernum, int &movetox, int &
 	point nextcords;
 
 	int i, valid;
-	// if users cords has any geeti and has its own geeti
-		// then check if that geeti can move
-		// if yes then move that geeti
-			// if that geeti has killed another then send the other geeti home
-			// if geeti comes to finish then
-				// if all geetis are on finish then finished = 1
 
 	// if not users cords has any piece or not has its own piece
-	if (board[cordx][cordy].top = -1)
+	if (board[cordx][cordy].top == -1)
 		return FALSE;
 	if (board[cordx][cordy].player != playernum)
 		return FALSE;
@@ -207,7 +199,9 @@ int validmove(int cordx, int cordy, int dice, int playernum, int &movetox, int &
 	// Check if that piece can move
 
 		//if piece is at home and dice is not six then that piece can't move
-		if (!((cordx >= 0 && cordx <= 14 && cordy <=6 && cordy >= 8) || (cordx >= 6 && cordx <= 8 && cordy <= 0 && cordy >= 14)) && (dice != 6))
+		if (!((cordx >= 0 && cordx <= 14 && cordy <=6 && cordy >= 8) || 
+			  (cordx >= 6 && cordx <= 8 && cordy <= 0 && cordy >= 14))
+				 && (dice != 6))
 			return 0;
 
 		//if piece is at home and dice IS six then that piece can move providced there is not doublee at his home
@@ -250,7 +244,7 @@ int validmove(int cordx, int cordy, int dice, int playernum, int &movetox, int &
 			 (nextcords.x == 11 && nextcords.y == 6 ) ||
 			 (nextcords.x == 8  && nextcords.y == 12))
 			)
-			return FALSE;
+		return FALSE;
 
 
 		//Check if there is star and its not player's personal star
@@ -568,7 +562,7 @@ void drawscreenelements()
 {
 	int xmax = getmaxx(),
 		ymax = getmaxy();
-	int i, size;
+	int i,j, size;
 
 	cleardevice();
 	setfillstyle(SOLID_FILL, LIGHTGRAY);	
@@ -682,7 +676,14 @@ void drawscreenelements()
 	setcolor(BLACK);
 	line(0, ymax - 21, xmax, ymax - 21);
 	line(undo.coords[0][0] - 1, ymax - 20, undo.coords[0][0] - 1, ymax);
-
+	
+	for (j = 0; j <= 3; j++)
+		if (player[j].type != TYPE_NONE)
+			for (i = 0; i <= 3; i++)
+			{
+				draw_block_pieces(player[j].piece[i].location.x, player[j].piece[i].location.y);
+				getch();
+			}
 }
 
 int getuseroption(int playerturn)
