@@ -368,6 +368,21 @@ void drawblock(int cordx, int cordy)
 
 void brd_push(Board& block, int playernum, int piece)
 {
+/*	//-----
+		if (block.top >= 4)
+		{
+			gotoxy(1,1);
+			cout << "Logical error while calling brd_push()";
+			return;
+		}
+		
+		if (block.top != -1 && block.player != playernum)
+		{
+			cout << "ek he jagah par do geetian bithanay ki nakam koshish!!!!";
+			return;	
+		}
+	//-----*/
+		
 	block.player = playernum;
 	block.top++;
 	block.pieces[block.top] = piece;
@@ -376,7 +391,13 @@ void brd_push(Board& block, int playernum, int piece)
 
 int brd_pop(Board& block)
 {
-
+/*	//-----
+		if (block.top == -1)
+		{
+			gotoxy (1,1);
+			cout << "Logical error while calling brd_pop()";
+		}
+	//-----*/
 		
 	int output;
 	
