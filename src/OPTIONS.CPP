@@ -494,18 +494,81 @@ int loadgame()
 	}
 	
 	file.read((char*)&turn, sizeof turn);
+/*
+//----Testing ---- :)
+	//Blue player	
+	file.read( (char*)&player[0].type, sizeof player[0].type);
+	file.read( (char*)&player[0].piece[0].status, sizeof player[0].piece[0].status);
+	file.read( (char*)&player[0].piece[0].location.x, sizeof player[0].piece[0].location.x);
+	file.read( (char*)&player[0].piece[0].location.y, sizeof player[0].piece[0].location.y);
+	file.read( (char*)&player[0].piece[1].status, sizeof player[0].piece[1].status);
+	file.read( (char*)&player[0].piece[1].location.x, sizeof player[0].piece[1].location.x);
+	file.read( (char*)&player[0].piece[1].location.y, sizeof player[0].piece[1].location.y);
+	file.read( (char*)&player[0].piece[2].status, sizeof player[0].piece[2].status);
+	file.read( (char*)&player[0].piece[2].location.x, sizeof player[0].piece[2].location.x);
+	file.read( (char*)&player[0].piece[2].location.y, sizeof player[0].piece[2].location.y);
+	file.read( (char*)&player[0].piece[3].status, sizeof player[0].piece[3].status);
+	file.read( (char*)&player[0].piece[3].location.x, sizeof player[0].piece[3].location.x);
+	file.read( (char*)&player[0].piece[3].location.y, sizeof player[0].piece[3].location.y);
+	
+	//Green player
+	file.read( (char*)&player[1].type, sizeof player[1].type);
+	file.read( (char*)&player[1].piece[0].status, sizeof player[1].piece[0].status);
+	file.read( (char*)&player[1].piece[0].location.x, sizeof player[1].piece[0].location.x);
+	file.read( (char*)&player[1].piece[0].location.y, sizeof player[1].piece[0].location.y);
+	file.read( (char*)&player[1].piece[1].status, sizeof player[1].piece[1].status);
+	file.read( (char*)&player[1].piece[1].location.x, sizeof player[1].piece[1].location.x);
+	file.read( (char*)&player[1].piece[1].location.y, sizeof player[1].piece[1].location.y);
+	file.read( (char*)&player[1].piece[2].status, sizeof player[1].piece[2].status);
+	file.read( (char*)&player[1].piece[2].location.x, sizeof player[1].piece[2].location.x);
+	file.read( (char*)&player[1].piece[2].location.y, sizeof player[1].piece[2].location.y);
+	file.read( (char*)&player[1].piece[3].status, sizeof player[1].piece[3].status);
+	file.read( (char*)&player[1].piece[3].location.x, sizeof player[1].piece[3].location.x);
+	file.read( (char*)&player[1].piece[3].location.y, sizeof player[1].piece[3].location.y);
 
-	for (i = 0; i <= 3; i++)
+	//Red player
+	file.read( (char*)&player[2].type, sizeof player[2].type);
+	file.read( (char*)&player[2].piece[0].status, sizeof player[2].piece[0].status);
+	file.read( (char*)&player[2].piece[0].location.x, sizeof player[2].piece[0].location.x);
+	file.read( (char*)&player[2].piece[0].location.y, sizeof player[2].piece[0].location.y);
+	file.read( (char*)&player[2].piece[1].status, sizeof player[2].piece[1].status);
+	file.read( (char*)&player[2].piece[1].location.x, sizeof player[2].piece[1].location.x);
+	file.read( (char*)&player[2].piece[1].location.y, sizeof player[2].piece[1].location.y);
+	file.read( (char*)&player[2].piece[2].status, sizeof player[2].piece[2].status);
+	file.read( (char*)&player[2].piece[2].location.x, sizeof player[2].piece[2].location.x);
+	file.read( (char*)&player[2].piece[2].location.y, sizeof player[2].piece[2].location.y);
+	file.read( (char*)&player[2].piece[3].status, sizeof player[2].piece[3].status);
+	file.read( (char*)&player[2].piece[3].location.x, sizeof player[2].piece[3].location.x);
+	file.read( (char*)&player[2].piece[3].location.y, sizeof player[2].piece[3].location.y);
+		
+	//Yellow player
+	file.read( (char*)&player[3].type, sizeof player[3].type);
+	file.read( (char*)&player[3].piece[0].status, sizeof player[3].piece[0].status);
+	file.read( (char*)&player[3].piece[0].location.x, sizeof player[3].piece[0].location.x);
+	file.read( (char*)&player[3].piece[0].location.y, sizeof player[3].piece[0].location.y);
+	file.read( (char*)&player[3].piece[1].status, sizeof player[3].piece[1].status);
+	file.read( (char*)&player[3].piece[1].location.x, sizeof player[3].piece[1].location.x);
+	file.read( (char*)&player[3].piece[1].location.y, sizeof player[3].piece[1].location.y);
+	file.read( (char*)&player[3].piece[2].status, sizeof player[3].piece[2].status);
+	file.read( (char*)&player[3].piece[2].location.x, sizeof player[3].piece[2].location.x);
+	file.read( (char*)&player[3].piece[2].location.y, sizeof player[3].piece[2].location.y);
+	file.read( (char*)&player[3].piece[3].status, sizeof player[3].piece[3].status);
+	file.read( (char*)&player[3].piece[3].location.x, sizeof player[3].piece[3].location.x);
+	file.read( (char*)&player[3].piece[3].location.y, sizeof player[3].piece[3].location.y);
+//---- Testing ----
+*/
+
+/*	for (i = 0; i <= 3; i++)
 	{
 		file.read ((char*)&player[i].type, sizeof player[i].type);
 		
 		for (j = 0; j <= 3; j++)
 		{	
 			file.read( (char*)&player[i].piece[j].status, sizeof player[i].piece[j].status);
-			file.read( (char*)&player[i].piece[j].location, sizeof player[i].piece[j].location.x);
-			file.read( (char*)&player[i].piece[j].location, sizeof player[i].piece[j].location.x);
+			file.read( (char*)&player[i].piece[j].location.x, sizeof player[i].piece[j].location.x);
+			file.read( (char*)&player[i].piece[j].location.y, sizeof player[i].piece[j].location.y);
 		}
-	}
+	}*/
 
 	for (i = 0; i <= 14; i++)
 		for(j = 0; j <= 14; j++)
@@ -514,7 +577,8 @@ int loadgame()
 	for (i = 0; i <= 3; i++)
 		for(j = 0; j <= 3; j++)
 		{
-			brd_push(board[player[i].piece[j].location.x][player[i].piece[j].location.y] ,i ,j);
+			if (player[i].type != TYPE_NONE)
+				brd_push(board[player[i].piece[j].location.x][player[i].piece[j].location.y] ,i ,j);
 		}
 	
 	file.close();
@@ -618,7 +682,8 @@ void showlogo()
 	int xmax = getmaxx();
 	int ymax = getmaxy();
 	bitfileheader testing;
-	palettetype pal;
+	palettetype pal, palold;
+	getpalette(&palold);
 	getpalette(&pal);
 	int i, j;
 	char blue, green, red, pix1, pix2, pixel, alpha;
@@ -663,6 +728,7 @@ void showlogo()
 	{
 		read_mouse(&mouse);
 	}while(!kbhit() || !button_press(LEFT_BUTTON, &mouse));
-		
+	
+//	setallpalette(&pal);
 }
 

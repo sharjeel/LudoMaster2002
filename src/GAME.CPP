@@ -196,14 +196,13 @@ void playgame()
 								}
 							}														
 						}
-						else
-						{
-							writestatus("None can move");
-							delay(500);
-						}
 						break;
 					case UNDO:
-						doundo();
+						do
+						{
+							doundo();
+							delay(100);
+						}while(player[turn].type != TYPE_HUMAN && undotail != NULL);
 						turnagain = TRUE;					
 						break;
 						
@@ -238,6 +237,7 @@ void playgame()
 				//Computer rolls the die
 						dice = rolldie(turn);
 
+						delay(1000);
 						//Check which pieces can move and which can't
 						for(i = 0; i <= 3; i++)
 						{
@@ -256,7 +256,6 @@ void playgame()
 						{
 
 							writestatus("Computer is thinking");
-							delay(1000);
 							
 							if (dice == 6)
 								turnagain = TRUE;
@@ -320,12 +319,7 @@ void playgame()
 								}
 							}														
 						}
-						else
-						{
-							writestatus("None can move");
-							delay(500);
-						}
-				
+					
 			}
 		}
 		//If player isn't supposed to roll die again, next player's turn comes
@@ -1214,19 +1208,90 @@ void savegame()
 	int i,j;
 	fstream file("save.lud",ios::out);
 
+	if(!file)
+		return;
+
+//----Testing---
+	
 	file.write((char*)&turn, sizeof turn);
+	
+	//Blue player	
+	file.write( (char*)&player[0].type, sizeof player[0].type);
+	file.write( (char*)&player[0].piece[0].status, sizeof player[0].piece[0].status);
+	file.write( (char*)&player[0].piece[0].location.x, sizeof player[0].piece[0].location.x);
+	file.write( (char*)&player[0].piece[0].location.y, sizeof player[0].piece[0].location.y);
+	file.write( (char*)&player[0].piece[1].status, sizeof player[0].piece[1].status);
+	file.write( (char*)&player[0].piece[1].location.x, sizeof player[0].piece[1].location.x);
+	file.write( (char*)&player[0].piece[1].location.y, sizeof player[0].piece[1].location.y);
+	file.write( (char*)&player[0].piece[2].status, sizeof player[0].piece[2].status);
+	file.write( (char*)&player[0].piece[2].location.x, sizeof player[0].piece[2].location.x);
+	file.write( (char*)&player[0].piece[2].location.y, sizeof player[0].piece[2].location.y);
+	file.write( (char*)&player[0].piece[3].status, sizeof player[0].piece[3].status);
+	file.write( (char*)&player[0].piece[3].location.x, sizeof player[0].piece[3].location.x);
+	file.write( (char*)&player[0].piece[3].location.y, sizeof player[0].piece[3].location.y);
+	
+	//Green player
+	file.write( (char*)&player[1].type, sizeof player[1].type);
+	file.write( (char*)&player[1].piece[0].status, sizeof player[1].piece[0].status);
+	file.write( (char*)&player[1].piece[0].location.x, sizeof player[1].piece[0].location.x);
+	file.write( (char*)&player[1].piece[0].location.y, sizeof player[1].piece[0].location.y);
+	file.write( (char*)&player[1].piece[1].status, sizeof player[1].piece[1].status);
+	file.write( (char*)&player[1].piece[1].location.x, sizeof player[1].piece[1].location.x);
+	file.write( (char*)&player[1].piece[1].location.y, sizeof player[1].piece[1].location.y);
+	file.write( (char*)&player[1].piece[2].status, sizeof player[1].piece[2].status);
+	file.write( (char*)&player[1].piece[2].location.x, sizeof player[1].piece[2].location.x);
+	file.write( (char*)&player[1].piece[2].location.y, sizeof player[1].piece[2].location.y);
+	file.write( (char*)&player[1].piece[3].status, sizeof player[1].piece[3].status);
+	file.write( (char*)&player[1].piece[3].location.x, sizeof player[1].piece[3].location.x);
+	file.write( (char*)&player[1].piece[3].location.y, sizeof player[1].piece[3].location.y);
+
+	//Red player
+	file.write( (char*)&player[2].type, sizeof player[2].type);
+	file.write( (char*)&player[2].piece[0].status, sizeof player[2].piece[0].status);
+	file.write( (char*)&player[2].piece[0].location.x, sizeof player[2].piece[0].location.x);
+	file.write( (char*)&player[2].piece[0].location.y, sizeof player[2].piece[0].location.y);
+	file.write( (char*)&player[2].piece[1].status, sizeof player[2].piece[1].status);
+	file.write( (char*)&player[2].piece[1].location.x, sizeof player[2].piece[1].location.x);
+	file.write( (char*)&player[2].piece[1].location.y, sizeof player[2].piece[1].location.y);
+	file.write( (char*)&player[2].piece[2].status, sizeof player[2].piece[2].status);
+	file.write( (char*)&player[2].piece[2].location.x, sizeof player[2].piece[2].location.x);
+	file.write( (char*)&player[2].piece[2].location.y, sizeof player[2].piece[2].location.y);
+	file.write( (char*)&player[2].piece[3].status, sizeof player[2].piece[3].status);
+	file.write( (char*)&player[2].piece[3].location.x, sizeof player[2].piece[3].location.x);
+	file.write( (char*)&player[2].piece[3].location.y, sizeof player[2].piece[3].location.y);
+		
+	//Yellow player
+	file.write( (char*)&player[3].type, sizeof player[3].type);
+	file.write( (char*)&player[3].piece[0].status, sizeof player[3].piece[0].status);
+	file.write( (char*)&player[3].piece[0].location.x, sizeof player[3].piece[0].location.x);
+	file.write( (char*)&player[3].piece[0].location.y, sizeof player[3].piece[0].location.y);
+	file.write( (char*)&player[3].piece[1].status, sizeof player[3].piece[1].status);
+	file.write( (char*)&player[3].piece[1].location.x, sizeof player[3].piece[1].location.x);
+	file.write( (char*)&player[3].piece[1].location.y, sizeof player[3].piece[1].location.y);
+	file.write( (char*)&player[3].piece[2].status, sizeof player[3].piece[2].status);
+	file.write( (char*)&player[3].piece[2].location.x, sizeof player[3].piece[2].location.x);
+	file.write( (char*)&player[3].piece[2].location.y, sizeof player[3].piece[2].location.y);
+	file.write( (char*)&player[3].piece[3].status, sizeof player[3].piece[3].status);
+	file.write( (char*)&player[3].piece[3].location.x, sizeof player[3].piece[3].location.x);
+	file.write( (char*)&player[3].piece[3].location.y, sizeof player[3].piece[3].location.y);
+	
+//----Testing---
+
+
+
+/*	file.write((char*)&turn, sizeof turn);
 
 	for (i = 0; i <= 3; i++)
 	{
-		file.write((char*)player[i].type, sizeof player[i].type);
+		file.write((char*)&player[i].type, sizeof player[i].type);
 		
 		for (j = 0; j <= 3; j++)
 		{	
-			file.write( (char*)player[i].piece[j].status, sizeof player[i].piece[j].status);
-			file.write( (char*)player[i].piece[j].location.x, sizeof player[i].piece[j].location.x);
-			file.write( (char*)player[i].piece[j].location.y, sizeof player[i].piece[j].location.y);
+			file.write( (char*)&player[i].piece[j].status, sizeof player[i].piece[j].status);
+			file.write( (char*)&player[i].piece[j].location.x, sizeof player[i].piece[j].location.x);
+			file.write( (char*)&player[i].piece[j].location.y, sizeof player[i].piece[j].location.y);
 		}
-	}
+	}*/
 	
 	file.close();
 	return;	
@@ -1261,36 +1326,33 @@ void addundo(int turn, int fromx, int fromy, int tox, int toy, int boolkilled, i
 
 void doundo()
 {
-    do
+	if (undotail == NULL)
 	{
-		if (undotail == NULL)
-		{
-			writestatus("There is no more move to undo");
-			delay(100);
-			return;
-		}
+		writestatus("There is no move to undo");
+		delay(100);
+		return;
+	}
 
-		//Move the pieces back according to values stored in the node
-		movepiece(undotail->tox, undotail->toy, undotail->fromx, undotail->fromy);
-		if(undotail->boolkilled == TRUE)
-		{
-			movepiece(player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.x, player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.y,
-					undotail->tox, undotail->toy);
-			drawblock(player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.x, player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.y);
-		}
-		turn = undotail->playerturn;
+	//Move the pieces back according to values stored in the node
+	movepiece(undotail->tox, undotail->toy, undotail->fromx, undotail->fromy);
+	if(undotail->boolkilled == TRUE)
+	{
+		movepiece(player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.x, player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.y,
+				  undotail->tox, undotail->toy);
+		drawblock(player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.x, player[undotail->playerkilled].piece[undotail->piecekilled].homelocation.y);
+	}
+	turn = undotail->playerturn;
 
-		drawblock(undotail->fromx,undotail->fromy);
-		drawblock(undotail->tox,undotail->toy);
-		draw_block_pieces(undotail->fromx,undotail->fromy);
-		draw_block_pieces(undotail->tox,undotail->toy);
+	drawblock(undotail->fromx,undotail->fromy);
+	drawblock(undotail->tox,undotail->toy);
+	draw_block_pieces(undotail->fromx,undotail->fromy);
+	draw_block_pieces(undotail->tox,undotail->toy);
 
-		//Delete the last node, just before the tail
-		undonode *tempnode;
-		tempnode = undotail;
-		undotail = tempnode->prev;
-		delete tempnode;
-	}while(player[turn].type != TYPE_HUMAN );
+	//Delete the last node, just before the tail
+	undonode *tempnode;
+	tempnode = undotail;
+	undotail = tempnode->prev;
+	delete tempnode;
 }
 
 point computermove(int dice, int playerturn)
